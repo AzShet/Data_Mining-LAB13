@@ -2,6 +2,7 @@ import polars as pl
 import numpy as np
 from typing import List, Dict, Tuple, Any
 from ucimlrepo import fetch_ucirepo
+import polars.selectors as cs # <--- 1. IMPORTAMOS EL MÓDULO DE SELECTORES
 
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
@@ -11,26 +12,15 @@ from sklearn.metrics import accuracy_score
 def load_and_prepare_data(dataset_id: int, target: str, threshold: float) -> pl.DataFrame:
     """
     Obtiene un dataset desde UCI ML Repo, lo combina y prepara para el análisis.
-
-    Args:
-        dataset_id (int): El ID del dataset en el repositorio UCI.
-        target (str): El nombre de la columna objetivo.
-        threshold (float): El umbral para binarizar la variable objetivo.
-
-    Returns:
-        pl.DataFrame: Un DataFrame de Polars combinado y preprocesado.
     """
-    # Obtener el dataset usando la librería oficial
     repo = fetch_ucirepo(id=dataset_id)
     X_pd = repo.data.features
     y_pd = repo.data.targets
 
-    # Convertir a Polars y combinar features y target
     X_pl = pl.from_pandas(X_pd)
     y_pl = pl.from_pandas(y_pd)
     df = pl.concat([X_pl, y_pl], how="horizontal")
 
-    # Realizar el preprocesamiento inicial
     df = df.drop("date")
     df = df.with_columns(
         pl.when(pl.col(target) >= threshold)
@@ -39,8 +29,6 @@ def load_and_prepare_data(dataset_id: int, target: str, threshold: float) -> pl.
         .alias(target)
     )
     return df
-
-# --- El resto de las funciones permanecen sin cambios ---
 
 def handle_missing_values(df: pl.DataFrame) -> pl.DataFrame:
     """Rellena valores faltantes en columnas de tipo float con su mediana."""
@@ -52,7 +40,10 @@ def handle_missing_values(df: pl.DataFrame) -> pl.DataFrame:
 
 def handle_multivariate_outliers(df: pl.DataFrame, contamination: float = 0.05) -> pl.DataFrame:
     """Detecta y elimina outliers multivariados usando Isolation Forest."""
-    numeric_cols = df.select(pl.col(pl.NUMERIC_DTYPES)).columns
+    # 2. USAMOS cs.numeric() EN LUGAR DE pl.NUMERIC_DTYPES
+    numeric_cols = df.select(cs.numeric()).columns
+
+    # El resto de la función no necesita cambios
     numeric_data_np = df.select(numeric_cols).to_numpy()
     iso_forest = IsolationForest(contamination=contamination, random_state=42)
     outliers = iso_forest.fit_predict(numeric_data_np)
