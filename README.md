@@ -20,7 +20,7 @@ Este repositorio representa el entregable del Laboratorio N°13 del curso de **D
 
 ### Docente
 
-> **[Luis Paraguay Arzapalo](https://github.com/luispar90)**
+> **[Luis Paraguay Arzapalo](https://www.linkedin.com/in/luisparaguay/)**
 >
 > Ingeniero de sistemas y magíster en Dirección de Tecnologías de la información por la ESAN y La Salle de España. Especialista en Big Data, Business Intelligence, Machine Learning, Cloud, SQL, Modelamiento de Datos y Agilidad.
 
